@@ -10,40 +10,40 @@ npm install hapi-webpack-dev-server
 
 ## Usage
 
-1) Create the connection object
+1. Create the connection object
 
-```js
-// Read configuration from process.cwd() + '/webpack.config.js'
-var WebpackConnection = require('hapi-webpack-connection')();
+  ```js
+  // Read configuration from process.cwd() + '/webpack.config.js'
+  var WebpackConnection = require('hapi-webpack-connection')();
 
 
-// Or define configuration
-var webpackConfig = {
-  // ... webpack options
-  // See http://webpack.github.io/docs/configuration.html
+  // Or define configuration
+  var webpackConfig = {
+    // ... webpack options
+    // See http://webpack.github.io/docs/configuration.html
 
-  devServer: {
-    // ... webpack-dev-server options
-    // See http://webpack.github.io/docs/webpack-dev-server.html
-  }
-};
-var WebpackConnection = require('hapi-webpack-connection')(webpackConfig);
-```
+    devServer: {
+      // ... webpack-dev-server options
+      // See http://webpack.github.io/docs/webpack-dev-server.html
+    }
+  };
+  var WebpackConnection = require('hapi-webpack-connection')(webpackConfig);
+  ```
 
-2) Use it with Hapi
+2. Use it with Hapi
 
-The connection has a `webpack` label and Webpack configuration can be accessed via `connection.settings.app`.
+  The connection has a `webpack` label and Webpack configuration can be accessed via `connection.settings.app`.
 
-```js
-var Hapi = require('hapi');
+  ```js
+  var Hapi = require('hapi');
 
-var server = new Hapi.Server();
-server.connection(WebpackConnection);
+  var server = new Hapi.Server();
+  server.connection(WebpackConnection);
 
-server.start(function () {
-  console.log('Server running at:', server.info.uri);
-});
-```
+  server.start(function () {
+    console.log('Server running at:', server.info.uri);
+  });
+  ```
 
 
 ## Configuration
