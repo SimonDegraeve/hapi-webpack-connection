@@ -1,45 +1,45 @@
-/**
- * Import dependencies
- */
 'use strict';
+
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _objectWithoutProperties = function (obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; };
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+/**
+ * Import dependencies
+ */
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _Hoek = require('hoek');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _Hoek2 = _interopRequireDefault(_Hoek);
 
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+var _Path = require('path');
 
-var _hoek = require('hoek');
+var _Path2 = _interopRequireDefault(_Path);
 
-var _hoek2 = _interopRequireDefault(_hoek);
+var _SocketIO = require('socket.io');
 
-var _path = require('path');
+var _SocketIO2 = _interopRequireDefault(_SocketIO);
 
-var _path2 = _interopRequireDefault(_path);
+var _SupportsColor = require('supports-color');
 
-var _socketIo = require('socket.io');
+var _SupportsColor2 = _interopRequireDefault(_SupportsColor);
 
-var _socketIo2 = _interopRequireDefault(_socketIo);
+var _Url = require('url');
 
-var _supportsColor = require('supports-color');
+var _Url2 = _interopRequireDefault(_Url);
 
-var _supportsColor2 = _interopRequireDefault(_supportsColor);
+var _Webpack = require('webpack');
 
-var _url = require('url');
+var _Webpack2 = _interopRequireDefault(_Webpack);
 
-var _url2 = _interopRequireDefault(_url);
+var _WebpackDevServer = require('webpack-dev-server');
 
-var _webpack = require('webpack');
-
-var _webpack2 = _interopRequireDefault(_webpack);
-
-var _webpackDevServer = require('webpack-dev-server');
-
-var _webpackDevServer2 = _interopRequireDefault(_webpackDevServer);
+var _WebpackDevServer2 = _interopRequireDefault(_WebpackDevServer);
 
 /**
  * Default configuration
@@ -63,7 +63,7 @@ var defaults = {
     stats: {
       cached: false,
       cachedAssets: false,
-      colors: _supportsColor2['default'],
+      colors: _SupportsColor2['default'],
       context: process.cwd()
     }
   },
@@ -83,7 +83,7 @@ exports['default'] = function (options) {
   // If no options, look for `webpack.config.js`
   if (typeof options === 'undefined') {
     try {
-      options = require(_path2['default'].join(process.cwd(), 'webpack.config.js'));
+      options = require(_Path2['default'].join(process.cwd(), 'webpack.config.js'));
     } catch (error) {
       throw new Error('Webpack configuration not found');
     }
@@ -91,7 +91,7 @@ exports['default'] = function (options) {
 
   // Merge defaults and options
 
-  var _Hoek$applyToDefaults = _hoek2['default'].applyToDefaults(defaults, options);
+  var _Hoek$applyToDefaults = _Hoek2['default'].applyToDefaults(defaults, options);
 
   var serverConfig = _Hoek$applyToDefaults.devServer;
 
@@ -118,11 +118,11 @@ exports['default'] = function (options) {
   if (/^[0-9]$/.test(serverConfig.contentBase)) {
     serverConfig.contentBase = parseInt(serverConfig.contentBase, 10);
   } else if (!/^(https?:)?\/\//.test(serverConfig.contentBase)) {
-    serverConfig.contentBase = _path2['default'].resolve(serverConfig.contentBase);
+    serverConfig.contentBase = _Path2['default'].resolve(serverConfig.contentBase);
   }
 
   // Handle inline client
-  var serverUrl = _url2['default'].format({
+  var serverUrl = _Url2['default'].format({
     protocol: serverConfig.https ? 'https' : 'http',
     hostname: serverConfig.host,
     port: serverConfig.port
@@ -147,7 +147,7 @@ exports['default'] = function (options) {
   }
 
   // Create devServer
-  var devServer = new _webpackDevServer2['default']((0, _webpack2['default'])(compilerConfig), serverConfig);
+  var devServer = new _WebpackDevServer2['default'](_Webpack2['default'](compilerConfig), serverConfig);
 
   // Server is started
   devServer.listeningApp.on('listening', function () {
@@ -158,7 +158,7 @@ exports['default'] = function (options) {
     });
 
     // Start SocketIO
-    devServer.io = _socketIo2['default'].listen(devServer.listeningApp, {
+    devServer.io = _SocketIO2['default'].listen(devServer.listeningApp, {
       'log level': 1
     });
 

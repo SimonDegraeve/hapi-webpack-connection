@@ -2,7 +2,7 @@
   "name": "hapi-webpack-connection",
   "version": "1.0.2",
   "description": "Bridge between Hapi and Webpack devServer",
-  "homepage": "https://github.com/SimonDegraeve/hapi-webpack-dev-server",
+  "homepage": "https://github.com/SimonDegraeve/hapi-webpack-connection",
   "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SimonDegraeve/hapi-webpack-dev-server.git"
+    "url": "https://github.com/SimonDegraeve/hapi-webpack-connection.git"
   },
   "keywords": [
     "hapi",
@@ -22,7 +22,7 @@
   "author": "Simon Degraeve <simon.degraeve@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SimonDegraeve/hapi-webpack-dev-server/issues"
+    "url": "https://github.com/SimonDegraeve/hapi-webpack-connection/issues"
   },
   "dependencies": {
     "hoek": "^2.14.0",
