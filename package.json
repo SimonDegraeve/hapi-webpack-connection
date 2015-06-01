@@ -1,6 +1,6 @@
 {
   "name": "hapi-webpack-connection",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Bridge between Hapi and Webpack devServer",
   "homepage": "https://github.com/SimonDegraeve/hapi-webpack-connection",
   "main": "./dist/index.js",
@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "hoek": "^2.14.0",
+    "node-libs-browser": "^0.5.2",
     "socket.io": "^1.3.5",
     "supports-color": "^1.3.1",
     "webpack": "^1.9.10",
