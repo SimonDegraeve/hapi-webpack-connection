@@ -1,5 +1,8 @@
 # hapi-webpack-connection
 
+[![Maintenance Status][status-image]][status-url] [![Dependency Status][deps-image]][deps-url] [![NPM version][npm-image]][npm-url]
+
+
 Bridge between [Hapi](https://github.com/hapijs/hapi) and [Webpack](https://github.com/webpack/webpack-dev-server)
 
 ## Installation
@@ -185,3 +188,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+[npm-url]: https://npmjs.org/package/hapi-webpack-connection
+[npm-image]: http://img.shields.io/npm/v/hapi-webpack-connection.svg?style=flat-square
+
+[deps-url]: https://david-dm.org/SimonDegraeve/hapi-webpack-connection
+[deps-image]: https://img.shields.io/david/SimonDegraeve/hapi-webpack-connection.svg?style=flat-square
+
+[status-url]: https://github.com/SimonDegraeve/hapi-webpack-connection/pulse
+[status-image]: http://img.shields.io/badge/status-maintained-brightgreen.svg?style=flat-square
