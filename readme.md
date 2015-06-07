@@ -41,7 +41,8 @@ var Webpack = require('hapi-webpack-connection')(webpackConfig);
  */
 
 
-// The connection has a `webpack` label and Webpack configuration can be // accessed via `connection.settings.app`.
+// The connection has a `webpack` label and Webpack configuration can be
+// accessed via `connection.settings.app`.
 
 var Hapi = require('hapi');
 
@@ -103,7 +104,7 @@ var server = new Hapi.Server();
 server.connection(Webpack.connection);
 
 var assetsByChunkName = {};
-webpack.compiler.plugin('done', function (stats) {
+Webpack.compiler.plugin('done', function (stats) {
   assetsByChunkName = stats.toJson().assetsByChunkName;
 });
 
