@@ -147,7 +147,8 @@ exports['default'] = function (options) {
   }
 
   // Create devServer
-  var devServer = new _WebpackDevServer2['default'](_Webpack2['default'](compilerConfig), serverConfig);
+  var compiler = _Webpack2['default'](compilerConfig);
+  var devServer = new _WebpackDevServer2['default'](compiler, serverConfig);
 
   // Server is started
   devServer.listeningApp.on('listening', function () {
@@ -169,19 +170,23 @@ exports['default'] = function (options) {
       if (!devServer._stats) {
         return;
       }
+
       devServer._sendStats(socket, devServer._stats.toJson(), true);
     });
   });
 
   // Return Hapi connection object
   return {
-    app: _extends({
-      devServer: serverConfig }, compilerConfig),
-    host: serverConfig.host,
-    port: serverConfig.port,
-    labels: ['webpack'],
-    listener: devServer.listeningApp,
-    tls: serverConfig.https
+    connection: {
+      app: _extends({
+        devServer: serverConfig }, compilerConfig),
+      host: serverConfig.host,
+      port: serverConfig.port,
+      labels: ['webpack'],
+      listener: devServer.listeningApp,
+      tls: serverConfig.https
+    },
+    compiler: compiler
   };
 };
 

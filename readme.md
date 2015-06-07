@@ -13,9 +13,12 @@ npm install hapi-webpack-dev-server
 
 ## Usage
 
-**Create the connection object**
-
 ```js
+/**
+ * Create the connection object
+ */
+
+
 // Read configuration from process.cwd() + '/webpack.config.js'
 var WebpackConnection = require('hapi-webpack-connection')();
 
@@ -30,18 +33,23 @@ var webpackConfig = {
     // See http://webpack.github.io/docs/webpack-dev-server.html
   }
 };
-var WebpackConnection = require('hapi-webpack-connection')(webpackConfig);
-```
+var Webpack = require('hapi-webpack-connection')(webpackConfig);
 
-**And use it with Hapi**
 
-The connection has a `webpack` label and Webpack configuration can be accessed via `connection.settings.app`.
+/**
+ * And use it with Hapi
+ */
 
-```js
+
+// The connection has a `webpack` label and Webpack configuration can be // accessed via `connection.settings.app`.
+
 var Hapi = require('hapi');
 
 var server = new Hapi.Server();
-server.connection(WebpackConnection);
+server.connection(Webpack.connection);
+
+// You can access the compiler via
+// Webpack.compiler
 
 server.start(function () {
   console.log('Server running at:', server.info.uri);
@@ -85,6 +93,38 @@ server.start(function () {
 
 ## Examples
 
+**Using dynamic assets name**
+
+```js
+var Hapi = require('hapi');
+var Webpack = require('hapi-webpack-connection')();
+
+var server = new Hapi.Server();
+server.connection(Webpack.connection);
+
+var assetsByChunkName = {};
+webpack.compiler.plugin('done', function (stats) {
+  assetsByChunkName = stats.toJson().assetsByChunkName;
+});
+
+server.ext('onPreHandler', (request, reply) => {
+  request.pre.assetsByChunkName = assetsByChunkName;
+  return reply.continue();
+});
+
+server.route({
+  path: '/',
+  method: 'GET',
+  handler: function(request, reply) {
+    return reply(request.pre.assetsByChunkName);
+  }
+});
+
+server.start(function () {
+  console.log('Server running at:', server.info.uri);
+});
+```
+
 **Using hot-reloading**
 
 ```js
@@ -108,10 +148,10 @@ var webpackConfig = {
 // ]
 
 var Hapi = require('hapi');
-var WebpackConnection = require('hapi-webpack-connection')(webpackConfig);
+var Webpack = require('hapi-webpack-connection')(webpackConfig);
 
 var server = new Hapi.Server();
-server.connection(WebpackConnection);
+server.connection(Webpack.connection);
 
 server.start(function () {
   console.log('Server running at:', server.info.uri);
@@ -124,7 +164,7 @@ server.start(function () {
 var Hapi = require('hapi');
 
 var server = new Hapi.Server();
-server.connection(require('hapi-webpack-connection')());
+server.connection(require('hapi-webpack-connection')().connection);
 
 server.start(function () {
   console.log('Server running at:', server.info.uri);
@@ -135,11 +175,11 @@ server.start(function () {
 
 ```js
 var Glue = require('glue');
-var WebpackConnection = require('hapi-webpack-connection')();
+var Webpack = require('hapi-webpack-connection')();
 
 var manifest = {
   connections: [
-    WebpackConnection,
+    Webpack.connection,
     {
       port: 3001,
       labels: [

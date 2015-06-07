@@ -1,6 +1,6 @@
 {
   "name": "hapi-webpack-connection",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "Bridge between Hapi and Webpack devServer",
   "homepage": "https://github.com/SimonDegraeve/hapi-webpack-connection",
   "main": "./dist/index.js",

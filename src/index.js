@@ -112,7 +112,8 @@ export default (options) => {
   }
 
   // Create devServer
-  const devServer = new WebpackDevServer(Webpack(compilerConfig), serverConfig);
+  const compiler = Webpack(compilerConfig);
+  const devServer = new WebpackDevServer(compiler, serverConfig);
 
   // Server is started
   devServer.listeningApp.on('listening', () => {
@@ -134,20 +135,24 @@ export default (options) => {
       if (!devServer._stats) {
         return;
       }
+
       devServer._sendStats(socket, devServer._stats.toJson(), true);
     });
   });
 
   // Return Hapi connection object
   return {
-    app: {
-      devServer: serverConfig,
-      ...compilerConfig
+    connection: {
+      app: {
+        devServer: serverConfig,
+        ...compilerConfig
+      },
+      host: serverConfig.host,
+      port: serverConfig.port,
+      labels: ['webpack'],
+      listener: devServer.listeningApp,
+      tls: serverConfig.https
     },
-    host: serverConfig.host,
-    port: serverConfig.port,
-    labels: ['webpack'],
-    listener: devServer.listeningApp,
-    tls: serverConfig.https
+    compiler
   };
 };
