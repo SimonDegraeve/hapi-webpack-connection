@@ -47,6 +47,17 @@ var mergeArrayOrString = function mergeArrayOrString(a, b) {
 };
 
 /**
+ * Find module locally or in parent package
+ */
+var getModulePath = function getModulePath(path) {
+  try {
+    return require.resolve(_path2['default'].join(__dirname, '../node_modules/', path));
+  } catch (e) {
+    return path;
+  }
+};
+
+/**
  * Get devServer url from config
  */
 var getUrl = function getUrl(_ref) {
@@ -92,10 +103,11 @@ var normalizeConfig = function normalizeConfig(config) {
   // Normalize entry
   if (config.devServer.inline) {
     (function () {
-      var client = ['webpack-dev-server/client?' + getUrl(config)];
+
+      var client = [getModulePath('webpack-dev-server/client') + '?' + getUrl(config)];
 
       if (config.devServer.hot) {
-        client.push('webpack/hot/dev-server');
+        client.push(getModulePath('webpack/hot/dev-server'));
       }
 
       if (typeof config.entry === 'object' && !Array.isArray(config.entry)) {

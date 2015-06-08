@@ -17,6 +17,19 @@ const mergeArrayOrString = (a, b) => Array.isArray(b) ? [...a, ...b] : [...a, b]
 
 
 /**
+ * Find module locally or in parent package
+ */
+const getModulePath = (path) => {
+  try {
+    return require.resolve(Path.join(__dirname, '../node_modules/', path));
+  }
+  catch (e) {
+    return path;
+  }
+};
+
+
+/**
  * Get devServer url from config
  */
 const getUrl = ({devServer}, pathname = '') =>
@@ -65,10 +78,11 @@ const normalizeConfig = (config) => {
 
   // Normalize entry
   if (config.devServer.inline) {
-    const client = [`webpack-dev-server/client?${getUrl(config)}`];
+
+    const client = [getModulePath('webpack-dev-server/client') + '?' + getUrl(config)];
 
     if (config.devServer.hot) {
-      client.push('webpack/hot/dev-server');
+      client.push(getModulePath('webpack/hot/dev-server'));
     }
 
     if (typeof config.entry === 'object' && !Array.isArray(config.entry)) {
