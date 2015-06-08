@@ -11,6 +11,83 @@ import WebpackDevServer from 'webpack-dev-server';
 
 
 /**
+ * Merge array with array or string
+ */
+const mergeArrayOrString = (a, b) => Array.isArray(b) ? [...a, ...b] : [...a, b];
+
+
+/**
+ * Get devServer url from config
+ */
+const getUrl = ({devServer}, pathname = '') =>
+  Url.format({
+    protocol: devServer.https ? 'https' : 'http',
+    hostname: devServer.host,
+    port: devServer.port,
+    pathname
+  });
+
+
+/**
+ * Normalize configuration
+ */
+const normalizeConfig = (config) => {
+
+  // Normalize publicPath
+  config.output.publicPath = getUrl(config, config.output.publicPath);
+
+  if (!config.devServer.publicPath) {
+    config.devServer.publicPath = config.output.publicPath;
+  }
+  else {
+    config.devServer.publicPath = getUrl(config, config.devServer.publicPath);
+  }
+
+
+  // Normalize filename
+  if (!config.devServer.filename) {
+    config.devServer.filename = config.output.filename;
+  }
+  config.output.path = '/';
+
+
+  // Normalize contenBase
+  if (typeof config.devServer.contentBase === 'object') {
+    throw new Error('Using contentBase as a proxy is deprecated. Use the proxy option instead');
+  }
+  else if (/^[0-9]$/.test(config.devServer.contentBase)) {
+    config.devServer.contentBase = parseInt(config.devServer.contentBase, 10);
+  }
+  else if (!/^(https?:)?\/\//.test(config.devServer.contentBase)) {
+    config.devServer.contentBase = Path.resolve(config.devServer.contentBase);
+  }
+
+
+  // Normalize entry
+  if (config.devServer.inline) {
+    const client = [`webpack-dev-server/client?${getUrl(config)}`];
+
+    if (config.devServer.hot) {
+      client.push('webpack/hot/dev-server');
+    }
+
+    if (typeof config.entry === 'object' && !Array.isArray(config.entry)) {
+      Object.keys(config.entry).forEach((key) =>
+        config.entry[key] = mergeArrayOrString(client, config.entry[key])
+      );
+    }
+    else {
+      config.entry = mergeArrayOrString(client, config.entry);
+    }
+  }
+
+
+  // Return normalized config
+  return config;
+};
+
+
+/**
  * Default configuration
  */
 const defaults = {
@@ -45,7 +122,7 @@ const defaults = {
 
 
 /**
- * Export Hapi connection constructor
+ * Export WebpackConnection constructor
  */
 export default (options) => {
 
@@ -59,61 +136,30 @@ export default (options) => {
     }
   }
 
-  // Merge defaults and options
-  const {devServer: serverConfig, ...compilerConfig} = Hoek.applyToDefaults(defaults, options);
 
-  // Normalize publicPath
-  if (!serverConfig.publicPath) {
-    serverConfig.publicPath = compilerConfig.output.publicPath;
-    if (!/^(https?:)?\/\//.test(serverConfig.publicPath) && serverConfig.publicPath[0] !== '/') {
-      serverConfig.publicPath = `/${serverConfig.publicPath}`;
-    }
-  }
+  // Normalize configuration
+  const config = normalizeConfig(Hoek.applyToDefaults(defaults, options));
 
-  // Normalize filename
-  if (!serverConfig.filename) {
-    serverConfig.filename = compilerConfig.output.filename;
-  }
-  compilerConfig.output.path = '/';
 
-  // Normalize contentBase (port or full URL)
-  if (typeof serverConfig.contentBase === 'object') {
-    throw new Error('Using contentBase as a proxy is deprecated. Use the proxy option instead');
-  }
-  if (/^[0-9]$/.test(serverConfig.contentBase)) {
-    serverConfig.contentBase = parseInt(serverConfig.contentBase, 10);
-  }
-  else if (!/^(https?:)?\/\//.test(serverConfig.contentBase)) {
-    serverConfig.contentBase = Path.resolve(serverConfig.contentBase);
-  }
+  // Create compiler
+  const compiler = Webpack(config);
 
-  // Handle inline client
-  const serverUrl = Url.format({
-    protocol: serverConfig.https ? 'https' : 'http',
-    hostname: serverConfig.host,
-    port: serverConfig.port
+
+  // Get assets
+  let assets = {};
+  compiler.plugin('done', (stats) => {
+    const {assetsByChunkName} = stats.toJson();
+    assets = Object.keys(assetsByChunkName).reduce((obj, chunkName) => {
+      obj[chunkName] = config.devServer.publicPath + assetsByChunkName[chunkName];
+      return obj;
+    }, {});
   });
+  const getAssets = () => Hoek.clone(assets);
 
-  if (serverConfig.inline) {
-    const client = [`webpack-dev-server/client?${serverUrl}`];
-
-    if (serverConfig.hot) {
-      client.push('webpack/hot/dev-server');
-    }
-
-    if (typeof compilerConfig.entry === 'object' && !Array.isArray(compilerConfig.entry)) {
-      Object.keys(compilerConfig.entry).forEach((key) =>
-        compilerConfig.entry[key] = [...client, compilerConfig.entry[key]]
-      );
-    }
-    else {
-      compilerConfig.entry = [...client, compilerConfig.entry];
-    }
-  }
 
   // Create devServer
-  const compiler = Webpack(compilerConfig);
-  const devServer = new WebpackDevServer(compiler, serverConfig);
+  const devServer = new WebpackDevServer(compiler, config.devServer);
+
 
   // Server is started
   devServer.listeningApp.on('listening', () => {
@@ -128,6 +174,7 @@ export default (options) => {
       'log level': 1
     });
 
+    // Send stats
     devServer.io.sockets.on('connection', (socket) => {
       if (devServer.hot) {
         socket.emit('hot');
@@ -140,19 +187,20 @@ export default (options) => {
     });
   });
 
-  // Return Hapi connection object
+
+  // Return object
   return {
+    compiler,
+    getAssets,
     connection: {
-      app: {
-        devServer: serverConfig,
-        ...compilerConfig
-      },
-      host: serverConfig.host,
-      port: serverConfig.port,
-      labels: ['webpack'],
+      host: config.devServer.host,
+      port: config.devServer.port,
+      tls: config.devServer.https,
       listener: devServer.listeningApp,
-      tls: serverConfig.https
-    },
-    compiler
+      labels: ['webpack'],
+      app: {
+        webpack: config
+      }
+    }
   };
 };

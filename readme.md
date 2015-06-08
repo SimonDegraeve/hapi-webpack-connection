@@ -11,120 +11,137 @@ Bridge between [Hapi](https://github.com/hapijs/hapi) and [Webpack](https://gith
 npm install hapi-webpack-dev-server
 ```
 
-## Usage
+## API
+
+### WebpackConnection([options])
+
+The `WebpackConnection()` function is a top-level function exported by the `hapi-webpack-connection` module.
 
 ```js
-/**
- * Create the connection object
- */
+var WebpackConnection = require('hapi-webpack-connection');
+var Webpack = WebpackConnection();
+```
 
+Creates a `Webpack` object where:
 
-// Read configuration from process.cwd() + '/webpack.config.js'
-var WebpackConnection = require('hapi-webpack-connection')();
+- `options` - optional webpack configuration object. See the [webpack documentation](http://webpack.github.io/docs/configuration.html#configuration-object-content) for all available options.
 
+  This object includes also the `webpack-dev-server` configuration via the `devServer` property. See the [webpack-dev-server documentation](http://webpack.github.io/docs/webpack-dev-server.html#webpack-dev-server-cli) for all available options.
 
-// Or define configuration
-var webpackConfig = {
-  // ... webpack options
-  // See http://webpack.github.io/docs/configuration.html
+  If omitted, the module will try to read the `webpack.config.js` file in the current working directory. This file should export the configuration object:
 
-  devServer: {
-    // ... webpack-dev-server options
-    // See http://webpack.github.io/docs/webpack-dev-server.html
-  }
-};
-var Webpack = require('hapi-webpack-connection')(webpackConfig);
+  ```js
+    module.exports = {
+      // configuration
+    };
+  ```
 
+  This is the defaults merged with the options by the module:
 
-/**
- * And use it with Hapi
- */
+  ```js
+  // Defaut configuration
+  {
+    devServer: {
+      contentBase: process.cwd(),
+      filename: null, // Get from output.filename
+      historyApiFallback: false,
+      host: 'localhost',
+      port: 0, // 0 = Randomly selected
+      hot: false,
+      https: false,
+      inline: false,
+      lazy: false,
+      noInfo: false,
+      outputPath: '/',
+      publicPath: null, // Get from output.publicPath
+      proxy: {},
+      quiet: false,
+      stats: {
+        cached: false,
+        cachedAssets: false,
+        // colors: true or false, turned on if the terminal supports it
+        context: process.cwd()
+      }
+    },
+    output: {
+      filename: 'bundle.js',
+      path: process.cwd(),
+      publicPath: '/'
+    }
+  ```
 
+### Webpack properties
 
-// The connection has a `webpack` label
-// and Webpack configuration can be accessed via `connection.settings.app`
+##### webpack.compiler
+
+The webpack `compiler` instance.
+
+```js
+var WebpackConnection = require('hapi-webpack-connection');
+var Webpack = WebpackConnection();
+
+Webpack.compiler.plugin('done', function(stats) {
+  console.log(stats.toString());
+});
+```
+
+##### webpack.connection
+
+The hapi `connection` configuration object. See the [hapi documentaion](http://hapijs.com/api#serverconnectionoptions) for all available options.
+
+The connection has a `webpack` label and exposes the webpack configuration via `app.webpack` which can later be accessed via `connection.settings.app.webpack`.
+
+```js
+var WebpackConnection = require('hapi-webpack-connection');
+var Webpack = WebpackConnection();
 
 var Hapi = require('hapi');
-
 var server = new Hapi.Server();
-server.connection(Webpack.connection);
 
-// You can access the compiler via
-// Webpack.compiler
+server.connection(Webpack.connection);
 
 server.start(function () {
   console.log('Server running at:', server.info.uri);
 });
 ```
 
-## Configuration
+### webpack.getAssets()
+
+Returns an object where each key is the name of the chunk and the value is the full url of the chunk.
+
+This object will not have any properties until the compilation is done.
 
 ```js
-// Defaut configuration
-{
-  devServer: {
-    contentBase: process.cwd(),
-    filename: null, // Get from compiler configuration
-    historyApiFallback: false,
-    host: 'localhost',
-    port: 0, // 0 = Randomly selected
-    hot: false,
-    https: false,
-    inline: false,
-    lazy: false,
-    noInfo: false,
-    outputPath: '/',
-    publicPath: null, // Get from compiler configuration
-    proxy: {},
-    quiet: false,
-    stats: {
-      cached: false,
-      cachedAssets: false,
-      // colors: true or false, turned on if the terminal supports it
-      context: process.cwd()
-    }
-  },
-  output: {
-    filename: 'bundle.js',
-    path: process.cwd(),
-    publicPath: '/'
+var webpackConfig = {
+  entry: {
+    main: './entry.js'
   }
-}
+  output: {
+    publicPath: '/assets',
+    filename: '[name]-compiled.js'
+  }
+  devServer: {
+    port: 3001
+  }
+};
+
+var WebpackConnection = require('hapi-webpack-connection');
+var Webpack = WebpackConnection(webpackConfig);
+
+console.log(Webpack.getAssets());
+// Compiling...
+// Print:
+// {}
+
+console.log(Webpack.getAssets());
+// Compiled...
+// Print:
+// {
+//   main: 'http://localhost:3001/assets/main-compiled.js'
+// }
 ```
 
 ## Examples
-
-**Using dynamic assets name**
-
-```js
-var Hapi = require('hapi');
-var Webpack = require('hapi-webpack-connection')();
-
-var server = new Hapi.Server();
-server.connection(Webpack.connection);
-
-var assetsByChunkName = {};
-Webpack.compiler.plugin('done', function (stats) {
-  assetsByChunkName = stats.toJson().assetsByChunkName;
-});
-
-server.ext('onPreHandler', (request, reply) => {
-  request.pre.assetsByChunkName = assetsByChunkName;
-  return reply.continue();
-});
-
-server.route({
-  path: '/',
-  method: 'GET',
-  handler: function(request, reply) {
-    return reply(request.pre.assetsByChunkName);
-  }
-});
-
-server.start(function () {
-  console.log('Server running at:', server.info.uri);
-});
-```
 
 **Using hot-reloading**
 
@@ -159,13 +176,27 @@ server.start(function () {
 });
 ```
 
-**Using shortcut**
+**Using `getAssets()`**
 
 ```js
 var Hapi = require('hapi');
+var Webpack = require('hapi-webpack-connection')();
 
 var server = new Hapi.Server();
-server.connection(require('hapi-webpack-connection')().connection);
+server.connection(Webpack.connection);
+
+server.ext('onPreHandler', (request, reply) => {
+  request.pre.assets = Webpack.getAssets();
+  return reply.continue();
+});
+
+server.route({
+  path: '/',
+  method: 'GET',
+  handler: function(request, reply) {
+    return reply(request.pre.assets);
+  }
+});
 
 server.start(function () {
   console.log('Server running at:', server.info.uri);
