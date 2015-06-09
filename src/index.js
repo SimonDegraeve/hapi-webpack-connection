@@ -164,7 +164,8 @@ export default (options) => {
   compiler.plugin('done', (stats) => {
     const {assetsByChunkName} = stats.toJson();
     assets = Object.keys(assetsByChunkName).reduce((obj, chunkName) => {
-      obj[chunkName] = config.devServer.publicPath + assetsByChunkName[chunkName];
+      let asset = assetsByChunkName[chunkName];
+      obj[chunkName] = config.devServer.publicPath + (Array.isArray(asset) ? asset[0] : asset);
       return obj;
     }, {});
   });

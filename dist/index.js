@@ -186,7 +186,8 @@ exports['default'] = function (options) {
     var assetsByChunkName = _stats$toJson.assetsByChunkName;
 
     assets = Object.keys(assetsByChunkName).reduce(function (obj, chunkName) {
-      obj[chunkName] = config.devServer.publicPath + assetsByChunkName[chunkName];
+      var asset = assetsByChunkName[chunkName];
+      obj[chunkName] = config.devServer.publicPath + (Array.isArray(asset) ? asset[0] : asset);
       return obj;
     }, {});
   });
