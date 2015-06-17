@@ -8,7 +8,7 @@ Bridge between [Hapi](https://github.com/hapijs/hapi) and [Webpack](https://gith
 ## Installation
 
 ```js
-npm install hapi-webpack-dev-server
+npm install hapi-webpack-connection
 ```
 
 ## API
