@@ -232,7 +232,9 @@ Glue.compose(manifest, function (error, server) {
     return console.error(error);
   }
 
-  console.log('Server running at:', server.info.uri);
+  server.start(function () {
+    console.log('Server running at:', server.info.uri);
+  });
 });
 ```
 
