@@ -5,6 +5,9 @@
 
 Bridge between [Hapi](https://github.com/hapijs/hapi) and [Webpack](https://github.com/webpack/webpack-dev-server)
 
+## DEPRECATED
+This package will not be maintained in the future, use [hapi-webpack-plugin](https://github.com/SimonDegraeve/hapi-webpack-plugin) instead.
+
 ## Installation
 
 ```js
@@ -269,4 +272,4 @@ SOFTWARE.
 [deps-image]: https://img.shields.io/david/SimonDegraeve/hapi-webpack-connection.svg?style=flat-square
 
 [status-url]: https://github.com/SimonDegraeve/hapi-webpack-connection/pulse
-[status-image]: http://img.shields.io/badge/status-maintained-brightgreen.svg?style=flat-square
+[status-image]: http://img.shields.io/badge/status-maintained-red.svg?style=flat-square
